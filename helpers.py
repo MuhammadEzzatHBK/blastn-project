@@ -20,8 +20,12 @@ import numpy as np
  """
 def extract_kmers(sequence,k):
     kmers=[]
+    kmer = ""
     for i in range(len(sequence)-k+1):
-        kmers.append([sequence[i],sequence[i+1],sequence[i+2]])
+        kmer = sequence[i]
+        for j in range(1,k):
+            kmer+=sequence[i+j]      
+        kmers.append(kmer)
     return kmers
 
 
