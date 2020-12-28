@@ -96,6 +96,8 @@ def SWM(querry_seq,db_seq,querry_index,db_index,k,
    start_checking =querry_index+k+extend_without_checking
    for i in range(querry_index+k,len(querry_seq)):
        for j in range(db_index+k,len(db_seq)):
+            if(j >= i):
+               break
            if(querry_seq[i]==db_seq[j]):
                querry_alignment+= querry_seq[i]
                db_alignment+= db_seq[j]
