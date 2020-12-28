@@ -117,6 +117,7 @@ def seed_extend(hssp_table,querry_seq,db_seq,k,
     df = pd.DataFrame(data)
     df.drop(df[df['raw_score'] < extention_threshold].index, inplace = True) 
     return df.sort_values(by=['raw_score'],ascending = 0).head(5)
+    #return df
 
 
 

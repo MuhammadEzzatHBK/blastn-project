@@ -96,32 +96,40 @@ def SWM(querry_seq,db_seq,querry_index,db_index,k,
    start_checking =querry_index+k+extend_without_checking
    for i in range(querry_index+k,len(querry_seq)):
        for j in range(db_index+k,len(db_seq)):
-            if(j >= i):
-               break
-           if(querry_seq[i]==db_seq[j]):
-               querry_alignment+= querry_seq[i]
-               db_alignment+= db_seq[j]
-               matrix[i][j] = match_score+matrix[i-1][j-1]
-           else:
-               D = matrix[i-1][j-1] + mismatch_score
-               R = matrix[i][j-1] + gap_score
-               C = matrix[i-1][j] + gap_score
-               matrix[i][j] = np.max([D,R,C])
+             D = 0
+             R = 0
+             C = 0
+             if(len(querry_alignment)+k+1 >= len(querry_seq)):
+                 break
+             if(querry_seq[i]==db_seq[j]):
+                 querry_alignment+= querry_seq[i]
+                 db_alignment+= db_seq[j]
+                 matrix[i][j] = match_score+matrix[i-1][j-1]
+             else:
+                 D = matrix[i-1][j-1] + mismatch_score
+                 R = matrix[i][j-1] + gap_score
+                 C = matrix[i-1][j] + gap_score
+                 matrix[i][j] = np.max([D,R,C])
               
-               if(matrix[i][j] == D):
-                   querry_alignment+= querry_seq[i]
-                   db_alignment+= db_seq[j]
-               elif(matrix[i][j] == R):
-                   querry_alignment += querry_seq[i]
-                   db_alignment += "_"
-               else:
-                   querry_alignment += "_"
-                   db_alignment+= db_seq[j]
+             if(matrix[i][j] == D):
+                 querry_alignment+= querry_seq[i]
+                 db_alignment+= db_seq[j]
+             elif(matrix[i][j] == R):
+                 querry_alignment += querry_seq[i]
+                 db_alignment += "_"
+             else:
+                 querry_alignment += "_"
+                 db_alignment+= db_seq[j]             
+             raw_score = matrix[i][j]
+             
                  #Break if we drop below threshold
-               if(i>= start_checking):
-                   if( matrix[i][j] < extention_threshold):
-                       break
-           raw_score = matrix[i][j]
+             if(i>= start_checking):
+                   if(raw_score < extention_threshold):
+                         break
+                   else:
+                         extention_threshold = raw_score #for this alignment
+                    
+           
                    
    querry_alignment = querry_seq[querry_index:querry_index+k] + querry_alignment
    db_alignment = db_seq[db_index:db_index+k] + db_alignment

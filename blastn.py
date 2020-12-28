@@ -20,4 +20,4 @@ def blastn(filepath,querry_seq,k,
         print(blast_pipeline(querry_seq,db_sequences[i],k,match_score,mismatch_score,gap_score,hssp_threshold,extend_without_checking,extention_threshold))
         print("============================================================\n")
 
-blastn('TestCases/db.db','ACAATTC',3,2,-1,-2,2,2,4)
+blastn('TestCases/db.db','ACAATTC',3,2,0,-1,2,3,2)
