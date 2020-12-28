@@ -97,12 +97,16 @@ def find_hssps(querry_seq,db_seq,k,match_score,mismatch_score,hssp_threshold):
                     
 """
 
-def seed_extend(hssp_table,querry_seq,db_seq,k,match_score,mismatch_score,gap_score,extention_threshold):
+def seed_extend(hssp_table,querry_seq,db_seq,k,
+                match_score,mismatch_score,gap_score,
+                extend_without_checking,extention_threshold):
     querry_alignments = []
     db_alignments = []
     raw_scores = []
     for i in range(hssp_table.shape[0]):
-        r,q,d = SWM(querry_seq,db_seq,hssp_table.iloc[i,1],hssp_table.iloc[i,2],k,match_score,mismatch_score,gap_score,extention_threshold,hssp_table.iloc[i,3])
+        r,q,d = SWM(querry_seq,db_seq,hssp_table.iloc[i,1],hssp_table.iloc[i,2],k,
+                    match_score,mismatch_score,gap_score,
+                    extend_without_checking, extention_threshold,hssp_table.iloc[i,3])
         querry_alignments.append(q)
         db_alignments.append(d)
         raw_scores.append(r)
@@ -110,7 +114,9 @@ def seed_extend(hssp_table,querry_seq,db_seq,k,match_score,mismatch_score,gap_sc
     data = {'querry_alignment':querry_alignments,
             'db_alignment':db_alignments,
             'raw_score':raw_scores}
-    return pd.DataFrame(data).sort_values(by=['raw_score'],ascending = 0).head(5)
+    df = pd.DataFrame(data)
+    df.drop(df[df['raw_score'] < extention_threshold].index, inplace = True) 
+    return df.sort_values(by=['raw_score'],ascending = 0).head(5)
 
 
 
@@ -149,9 +155,10 @@ def final_score(k,m,n,lamb,raw_score):
                         scores ordered by that socre. 
 
 """    
-def blast_pipeline(querry_seq,db_seq,k,match_score,mismatch_score,gap_score,hssp_threshold,extention_threshold):
+def blast_pipeline(querry_seq,db_seq,k,match_score,mismatch_score,gap_score,
+                   hssp_threshold,extend_without_checking,extention_threshold):
     table = find_hssps(querry_seq,db_seq,k,match_score,mismatch_score,hssp_threshold)
-    return seed_extend(table,querry_seq,db_seq,k,match_score,mismatch_score,gap_score,extention_threshold)
+    return seed_extend(table,querry_seq,db_seq,k,match_score,mismatch_score,gap_score,extend_without_checking,extention_threshold)
     
     
 

@@ -85,12 +85,15 @@ def ungapped_alignment(kmer1,kmer2,match_score,mismatch_score):
         querry_alignment : querry kmer after extention
         db_alignment : db kmer after extention
 """
-def SWM(querry_seq,db_seq,querry_index,db_index,k,match_score,mismatch_score,gap_score,extention_threshold,score):
+def SWM(querry_seq,db_seq,querry_index,db_index,k,
+        match_score,mismatch_score,gap_score,
+        extend_without_checking, extention_threshold,score):
    querry_alignment = ""
    db_alignment = ""
    raw_score = score
    matrix = np.zeros((len(querry_seq),len(db_seq)))
    #Start building table from the kmer position
+   start_checking =querry_index+k+extend_without_checking
    for i in range(querry_index+k,len(querry_seq)):
        for j in range(db_index+k,len(db_seq)):
            if(querry_seq[i]==db_seq[j]):
@@ -113,8 +116,9 @@ def SWM(querry_seq,db_seq,querry_index,db_index,k,match_score,mismatch_score,gap
                    querry_alignment += "_"
                    db_alignment+= db_seq[j]
                  #Break if we drop below threshold
-               if(matrix[i][j] < extention_threshold):
-                   break
+               if(i>= start_checking):
+                   if( matrix[i][j] < extention_threshold):
+                       break
            raw_score = matrix[i][j]
                    
    querry_alignment = querry_seq[querry_index:querry_index+k] + querry_alignment
