@@ -13,7 +13,7 @@ import pandas as pd
 import math
 import re
 import sqlite3
-runfile('helpers.py')
+exec(open('helpers.py').read())
 """ Imports the database to search in.
     
     Args:
@@ -110,7 +110,7 @@ def seed_extend(hssp_table,querry_seq,db_seq,k,match_score,mismatch_score,gap_sc
     data = {'querry_alignment':querry_alignments,
             'db_alignment':db_alignments,
             'raw_score':raw_scores}
-    return pd.DataFrame(data).sort_values(by=['raw_score'],ascending = 0)
+    return pd.DataFrame(data).sort_values(by=['raw_score'],ascending = 0).head(5)
 
 
 

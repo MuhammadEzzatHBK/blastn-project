@@ -102,9 +102,7 @@ def SWM(querry_seq,db_seq,querry_index,db_index,k,match_score,mismatch_score,gap
                R = matrix[i][j-1] + gap_score
                C = matrix[i-1][j] + gap_score
                matrix[i][j] = np.max([D,R,C])
-               #Break if we drop below threshold
-               if(matrix[i][j] < extention_threshold):
-                   break
+              
                if(matrix[i][j] == D):
                    querry_alignment+= querry_seq[i]
                    db_alignment+= db_seq[j]
@@ -114,6 +112,9 @@ def SWM(querry_seq,db_seq,querry_index,db_index,k,match_score,mismatch_score,gap
                else:
                    querry_alignment += "_"
                    db_alignment+= db_seq[j]
+                 #Break if we drop below threshold
+               if(matrix[i][j] < extention_threshold):
+                   break
            raw_score = matrix[i][j]
                    
    querry_alignment = querry_seq[querry_index:querry_index+k] + querry_alignment
