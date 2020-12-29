@@ -59,14 +59,13 @@ def encode_kmers(kmer):
         (float) Alignment Score
  """
 def ungapped_alignment(kmer1,kmer2,match_score,mismatch_score):
-    matrix = np.zeros((len(kmer1)+1,len(kmer2)+1))
-    for i in range(1,len(kmer1)+1):
-        for j in range(1,len(kmer2)+1):
-            if(kmer1[i-1]==kmer2[j-1]):
-                matrix[i][j]= matrix[i-1][j-1] + match_score
-            else:
-                matrix[i][j]= matrix[i-1][j-1] + mismatch_score
-    return matrix[len(kmer1)][len(kmer2)]
+    scores = np.zeros(len(kmer1))
+    for i in range(len(kmer1)):
+        if(kmer1[i-1]==kmer2[i-1]):
+            scores[i] = scores[i-1]+match_score
+        else:
+            scores[i] = scores[i-1]+mismatch_score
+    return scores[-1]
 
 """ The core process of extention through Smith-Waterman algorithm.
      
@@ -90,49 +89,61 @@ def SWM(querry_seq,db_seq,querry_index,db_index,k,
         extend_without_checking, extention_threshold,score):
    querry_alignment = ""
    db_alignment = ""
-   raw_score = score
+   raw_score = 0
    matrix = np.zeros((len(querry_seq),len(db_seq)))
+   matrix[querry_index+k-1][db_index+k-1] = score
+   resume = True
+   row = len(querry_seq) - 1
+   col = len(db_seq) - 1
    #Start building table from the kmer position
    start_checking =querry_index+k+extend_without_checking
    for i in range(querry_index+k,len(querry_seq)):
+       if(not resume):
+           break
        for j in range(db_index+k,len(db_seq)):
-             D = 0
-             R = 0
-             C = 0
-             if(len(querry_alignment)+k+1 >= len(querry_seq)):
-                 break
-             if(querry_seq[i]==db_seq[j]):
-                 querry_alignment+= querry_seq[i]
-                 db_alignment+= db_seq[j]
-                 matrix[i][j] = match_score+matrix[i-1][j-1]
-             else:
-                 D = matrix[i-1][j-1] + mismatch_score
-                 R = matrix[i][j-1] + gap_score
-                 C = matrix[i-1][j] + gap_score
-                 matrix[i][j] = np.max([D,R,C])
-              
-             if(matrix[i][j] == D):
-                 querry_alignment+= querry_seq[i]
-                 db_alignment+= db_seq[j]
-             elif(matrix[i][j] == R):
-                 querry_alignment += querry_seq[i]
-                 db_alignment += "_"
-             else:
-                 querry_alignment += "_"
-                 db_alignment+= db_seq[j]             
-             raw_score = matrix[i][j]
-             
-                 #Break if we drop below threshold
-             if(i>= start_checking):
-                   if(raw_score < extention_threshold):
-                         break
-                   else:
-                         extention_threshold = raw_score #for this alignment
-                    
+           R = 0
+           C = 0
+           if(querry_index+k+1-i >= len(querry_seq)):   
+               break
+           if(querry_seq[i] == db_seq[j]):
+               D = matrix[i-1][j-1] + match_score
+           else:
+               D = matrix[i-1][j-1] + mismatch_score
+               R = matrix[i][j-1] + gap_score
+               C = matrix[i-1][j] + gap_score
+               
+           matrix[i][j] = np.max([D,R,C])
+           raw_score = matrix[i][j] 
+          #Break if we drop below threshold
+           if(i>= start_checking):
+               if(raw_score < extention_threshold):
+                   resume = False
+                   row = i
+                   col = j
+                   break
+               else:
+                   extention_threshold = raw_score 
+    
+   
+   while(row > querry_index & col>db_index):
+        if((matrix[row][col] == matrix[row-1][col-1]+match_score) | (matrix[row][col] == matrix[row-1][col-1]+mismatch_score) ):
+            querry_alignment += querry_seq[row-1]
+            db_alignment += db_seq[col-1]
+            row-=1
+            col-=1
+        elif(matrix[row][col] == matrix[row-1][col]):
+            querry_alignment += querry_seq[row]
+            db_alignment += "_"
+            row -=1
+        else:
+            db_alignment += db_seq[col]
+            querry_alignment += "_"
+            col -=1            
            
-                   
-   querry_alignment = querry_seq[querry_index:querry_index+k] + querry_alignment
-   db_alignment = db_seq[db_index:db_index+k] + db_alignment
+   querry_alignment = querry_alignment[::-1]
+   db_alignment = db_alignment[::-1]                
+   querry_alignment = querry_seq[querry_index:querry_index+k+1] + querry_alignment
+   db_alignment = db_seq[db_index:db_index+k+1] + db_alignment
     
    return raw_score,querry_alignment,db_alignment
                  

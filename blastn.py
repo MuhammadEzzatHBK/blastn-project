@@ -15,9 +15,9 @@ def blastn(filepath,querry_seq,k,
            hssp_threshold,extend_without_checking,extention_threshold):
     db_sequences = import_data(filepath)
     for i in range(len(db_sequences)):
-        print("Sequence number",i+1,"results\n")
+        print("Sequence number",i+1,"results : "+ db_sequences[i] +"\n")
         print("============================================================\n")
         print(blast_pipeline(querry_seq,db_sequences[i],k,match_score,mismatch_score,gap_score,hssp_threshold,extend_without_checking,extention_threshold))
         print("============================================================\n")
 
-blastn('TestCases/db.db','ACAATTC',3,2,0,-1,2,3,2)
+blastn('TestCases/db.db','ACAATTC',3,2,-1,-1,2,1,4)
